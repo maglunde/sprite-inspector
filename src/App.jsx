@@ -87,6 +87,7 @@ export default function App() {
   const [imageSource, setImageSource] = useState('')
   const [imageName, setImageName] = useState('No file uploaded')
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
+  const [zoom, setZoom] = useState(1)
   const [selectionData, setSelectionData] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
@@ -252,6 +253,7 @@ export default function App() {
 
     setErrorMessage('')
     setImageName(file.name)
+    setZoom(1)
     setImageSource(URL.createObjectURL(file))
   }
 
@@ -462,59 +464,77 @@ export default function App() {
               <h2>Image</h2>
               <p>The selected region is highlighted in the preview.</p>
             </div>
-            <div className="clipboard-row">
-              <button
-                type="button"
-                className="copy-button"
-                onClick={copySelectionToClipboard}
-                disabled={!imageSource}
-                title="Copy region as x, y, width, height"
-                aria-label="Copy region as x, y, width, height"
-              >
-                Copy region
-              </button>
-              <span className="clipboard-status" aria-live="polite">
-                {copyStatus}
-              </span>
+            <div className="viewer-toolbar">
+              <label className="zoom-control">
+                <span>Zoom</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="12"
+                  step="0.25"
+                  value={zoom}
+                  onChange={(event) => setZoom(Number(event.target.value))}
+                  disabled={!imageSource}
+                />
+                <strong>{Math.round(zoom * 100)}%</strong>
+              </label>
+              <div className="clipboard-row">
+                <button
+                  type="button"
+                  className="copy-button"
+                  onClick={copySelectionToClipboard}
+                  disabled={!imageSource}
+                  title="Copy region as x, y, width, height"
+                  aria-label="Copy region as x, y, width, height"
+                >
+                  Copy region
+                </button>
+                <span className="clipboard-status" aria-live="polite">
+                  {copyStatus}
+                </span>
+              </div>
             </div>
           </div>
 
           <div className="image-stage">
             {imageSource ? (
-              <div
-                ref={imageSurfaceRef}
-                className="image-surface"
-                onPointerDown={handleStagePointerDown}
-                onPointerMove={handleSurfacePointerMove}
-                onPointerUp={endInteraction}
-                onPointerCancel={endInteraction}
-              >
-                <img
-                  ref={imageRef}
-                  src={imageSource}
-                  alt="Uploaded sprite"
-                  onLoad={handleImageLoad}
-                  className="sprite-image"
-                />
-                {imageSize.width && imageSize.height ? (
-                  <div
-                    className="selection-overlay"
-                    onPointerDown={handleOverlayPointerDown}
-                    style={{
-                      left: `${(boundedSelection.x / imageSize.width) * 100}%`,
-                      top: `${(boundedSelection.y / imageSize.height) * 100}%`,
-                      width: `${(boundedSelection.width / imageSize.width) * 100}%`,
-                      height: `${(boundedSelection.height / imageSize.height) * 100}%`,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="selection-resize-handle"
-                      aria-label="Resize selected region"
-                      onPointerDown={handleResizePointerDown}
-                    />
-                  </div>
-                ) : null}
+              <div className="image-scroll">
+                <div
+                  ref={imageSurfaceRef}
+                  className="image-surface"
+                  style={{ width: `${zoom * 100}%` }}
+                  onPointerDown={handleStagePointerDown}
+                  onPointerMove={handleSurfacePointerMove}
+                  onPointerUp={endInteraction}
+                  onPointerCancel={endInteraction}
+                >
+                  <img
+                    ref={imageRef}
+                    src={imageSource}
+                    alt="Uploaded sprite"
+                    onLoad={handleImageLoad}
+                    className="sprite-image"
+                  />
+                  {imageSize.width && imageSize.height ? (
+                    <div
+                      className="selection-overlay"
+                      onPointerDown={handleOverlayPointerDown}
+                      style={{
+                        left: `${(boundedSelection.x / imageSize.width) * 100}%`,
+                        top: `${(boundedSelection.y / imageSize.height) * 100}%`,
+                        width: `${(boundedSelection.width / imageSize.width) * 100}%`,
+                        height: `${(boundedSelection.height / imageSize.height) * 100}%`,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="selection-resize-handle"
+                        aria-label="Resize selected region"
+                        onPointerDown={handleResizePointerDown}
+                      />
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ) : (
               <div className="empty-state">
