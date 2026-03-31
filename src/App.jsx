@@ -89,6 +89,7 @@ export default function App() {
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
   const [selectionData, setSelectionData] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [copyStatus, setCopyStatus] = useState('')
   const imageRef = useRef(null)
   const imageSurfaceRef = useRef(null)
   const sourceCanvasRef = useRef(null)
@@ -163,6 +164,20 @@ export default function App() {
       }
     }
   }, [imageSource])
+
+  useEffect(() => {
+    if (!copyStatus) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyStatus('')
+    }, 1800)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [copyStatus])
 
   useEffect(() => {
     if (!imageRef.current || !sourceCanvasRef.current || !imageSize.width || !imageSize.height) {
@@ -251,6 +266,30 @@ export default function App() {
       width: clamp(current.width, 1, nextWidth),
       height: clamp(current.height, 1, nextHeight),
     }))
+  }
+
+  async function copySelectionToClipboard() {
+    const text = `x=${boundedSelection.x}, y=${boundedSelection.y}, w=${boundedSelection.width}, h=${boundedSelection.height}`
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const textarea = document.createElement('textarea')
+        textarea.value = text
+        textarea.setAttribute('readonly', '')
+        textarea.style.position = 'absolute'
+        textarea.style.left = '-9999px'
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
+
+      setCopyStatus('Copied to clipboard')
+    } catch {
+      setCopyStatus('Clipboard copy failed')
+    }
   }
 
   function beginInteraction(mode, event) {
@@ -414,12 +453,30 @@ export default function App() {
               <strong>{selectionData?.pixelCount ?? 0}</strong>
             </div>
           </div>
+
         </article>
 
         <article className="panel viewer-panel">
-          <div className="panel-heading">
-            <h2>Image</h2>
-            <p>The selected region is highlighted in the preview.</p>
+          <div className="panel-heading panel-heading-split">
+            <div>
+              <h2>Image</h2>
+              <p>The selected region is highlighted in the preview.</p>
+            </div>
+            <div className="clipboard-row">
+              <button
+                type="button"
+                className="copy-button"
+                onClick={copySelectionToClipboard}
+                disabled={!imageSource}
+                title="Copy region as x, y, width, height"
+                aria-label="Copy region as x, y, width, height"
+              >
+                Copy region
+              </button>
+              <span className="clipboard-status" aria-live="polite">
+                {copyStatus}
+              </span>
+            </div>
           </div>
 
           <div className="image-stage">

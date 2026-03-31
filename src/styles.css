@@ -117,6 +117,13 @@ code {
   margin-bottom: 18px;
 }
 
+.panel-heading-split {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .panel-heading h2,
 .output-stack h3 {
   margin: 0 0 6px;
@@ -171,6 +178,33 @@ code {
   display: block;
   color: rgba(244, 239, 232, 0.62);
   margin-bottom: 6px;
+}
+
+.clipboard-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.copy-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff7ed;
+  border-radius: 14px;
+  padding: 11px 16px;
+  cursor: pointer;
+}
+
+.copy-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.clipboard-status {
+  color: rgba(244, 239, 232, 0.72);
+  min-height: 1.5em;
 }
 
 .image-stage {
@@ -355,5 +389,14 @@ code {
   .input-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .panel-heading-split {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clipboard-row {
+    justify-content: flex-start;
   }
 }
