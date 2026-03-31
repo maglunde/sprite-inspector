@@ -343,11 +343,18 @@ code {
   place-items: center;
 }
 
-.crop-preview canvas {
+.crop-preview-canvas {
   max-width: 100%;
   height: auto;
   image-rendering: pixelated;
   border-radius: 12px;
+  border: 2px solid #f97316;
+  background: rgba(249, 115, 22, 0.12);
+  cursor: grab;
+}
+
+.crop-preview-canvas:active {
+  cursor: grabbing;
 }
 
 .stats-grid {

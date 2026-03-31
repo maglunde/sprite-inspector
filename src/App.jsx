@@ -307,7 +307,24 @@ export default function App() {
     interactionRef.current = {
       mode,
       pointerId: event.pointerId,
+      captureTarget: imageSurfaceRef.current,
       startPoint,
+      startSelection: boundedSelection,
+    }
+  }
+
+  function beginPreviewDrag(event) {
+    if (!previewCanvasRef.current) {
+      return
+    }
+
+    previewCanvasRef.current.setPointerCapture(event.pointerId)
+    interactionRef.current = {
+      mode: 'preview-drag',
+      pointerId: event.pointerId,
+      captureTarget: previewCanvasRef.current,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
       startSelection: boundedSelection,
     }
   }
@@ -343,7 +360,7 @@ export default function App() {
   function handleSurfacePointerMove(event) {
     const interaction = interactionRef.current
 
-    if (!interaction || interaction.pointerId !== event.pointerId) {
+    if (!interaction || interaction.pointerId !== event.pointerId || interaction.mode === 'preview-drag') {
       return
     }
 
@@ -377,6 +394,47 @@ export default function App() {
     )
   }
 
+  function handlePreviewPointerDown(event) {
+    if (!imageSource) {
+      return
+    }
+
+    beginPreviewDrag(event)
+  }
+
+  function handlePreviewPointerMove(event) {
+    const interaction = interactionRef.current
+
+    if (!interaction || interaction.pointerId !== event.pointerId || interaction.mode !== 'preview-drag') {
+      return
+    }
+
+    if (!previewCanvasRef.current) {
+      return
+    }
+
+    const bounds = previewCanvasRef.current.getBoundingClientRect()
+
+    if (!bounds.width || !bounds.height) {
+      return
+    }
+
+    const deltaX = Math.round(
+      ((event.clientX - interaction.startClientX) / bounds.width) * interaction.startSelection.width,
+    )
+    const deltaY = Math.round(
+      ((event.clientY - interaction.startClientY) / bounds.height) * interaction.startSelection.height,
+    )
+
+    setSelection(
+      normalizeSelection({
+        ...interaction.startSelection,
+        x: interaction.startSelection.x + deltaX,
+        y: interaction.startSelection.y + deltaY,
+      }),
+    )
+  }
+
   function endInteraction(event) {
     const interaction = interactionRef.current
 
@@ -386,8 +444,8 @@ export default function App() {
 
     interactionRef.current = null
 
-    if (imageSurfaceRef.current?.hasPointerCapture(event.pointerId)) {
-      imageSurfaceRef.current.releasePointerCapture(event.pointerId)
+    if (interaction.captureTarget?.hasPointerCapture(event.pointerId)) {
+      interaction.captureTarget.releasePointerCapture(event.pointerId)
     }
   }
 
@@ -560,7 +618,18 @@ export default function App() {
             </div>
 
             <div className="crop-preview">
-              <canvas ref={previewCanvasRef} />
+              {imageSource ? (
+                <canvas
+                  ref={previewCanvasRef}
+                  className="crop-preview-canvas"
+                  onPointerDown={handlePreviewPointerDown}
+                  onPointerMove={handlePreviewPointerMove}
+                  onPointerUp={endInteraction}
+                  onPointerCancel={endInteraction}
+                />
+              ) : (
+                <p className="muted">No image selected.</p>
+              )}
             </div>
 
             <div className="stats-grid">
