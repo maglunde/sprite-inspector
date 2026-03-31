@@ -92,10 +92,12 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
   const imageRef = useRef(null)
+  const imageScrollRef = useRef(null)
   const imageSurfaceRef = useRef(null)
   const sourceCanvasRef = useRef(null)
   const previewCanvasRef = useRef(null)
   const interactionRef = useRef(null)
+  const previousZoomRef = useRef(zoom)
 
   const boundedSelection = useMemo(() => {
     if (!imageSize.width || !imageSize.height) {
@@ -232,6 +234,60 @@ export default function App() {
       previewCanvas.height,
     )
   }, [boundedSelection, selectionData])
+
+  useEffect(() => {
+    if (
+      previousZoomRef.current === zoom ||
+      !imageSource ||
+      !imageSize.width ||
+      !imageSize.height ||
+      !imageScrollRef.current ||
+      !imageRef.current
+    ) {
+      previousZoomRef.current = zoom
+      return undefined
+    }
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      const scrollContainer = imageScrollRef.current
+      const imageElement = imageRef.current
+
+      if (!scrollContainer || !imageElement) {
+        previousZoomRef.current = zoom
+        return
+      }
+
+      const renderedWidth = imageElement.clientWidth
+      const renderedHeight = imageElement.clientHeight
+
+      if (!renderedWidth || !renderedHeight) {
+        previousZoomRef.current = zoom
+        return
+      }
+
+      const selectionCenterX =
+        ((boundedSelection.x + boundedSelection.width / 2) / imageSize.width) * renderedWidth
+      const selectionCenterY =
+        ((boundedSelection.y + boundedSelection.height / 2) / imageSize.height) * renderedHeight
+
+      scrollContainer.scrollLeft = clamp(
+        selectionCenterX - scrollContainer.clientWidth / 2,
+        0,
+        scrollContainer.scrollWidth - scrollContainer.clientWidth,
+      )
+      scrollContainer.scrollTop = clamp(
+        selectionCenterY - scrollContainer.clientHeight / 2,
+        0,
+        scrollContainer.scrollHeight - scrollContainer.clientHeight,
+      )
+
+      previousZoomRef.current = zoom
+    })
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId)
+    }
+  }, [zoom, boundedSelection, imageSize.height, imageSize.width, imageSource])
 
   function updateSelection(field, value) {
     const nextValue = Number.isFinite(value) ? value : 0
@@ -543,7 +599,7 @@ export default function App() {
 
           <div className="image-stage">
             {imageSource ? (
-              <div className="image-scroll">
+              <div ref={imageScrollRef} className="image-scroll">
                 <div
                   ref={imageSurfaceRef}
                   className="image-surface"
