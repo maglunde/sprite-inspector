@@ -113,6 +113,8 @@ export default function App() {
     }
   }, [imageSize.height, imageSize.width, selection])
 
+  const frameArguments = `${boundedSelection.x}, ${boundedSelection.y}, ${boundedSelection.width}, ${boundedSelection.height}`
+
   function normalizeSelection(nextSelection) {
     if (!imageSize.width || !imageSize.height) {
       return {
@@ -271,7 +273,7 @@ export default function App() {
   }
 
   async function copySelectionToClipboard() {
-    const text = `x=${boundedSelection.x}, y=${boundedSelection.y}, w=${boundedSelection.width}, h=${boundedSelection.height}`
+    const text = frameArguments
 
     try {
       if (navigator.clipboard?.writeText) {
@@ -478,21 +480,6 @@ export default function App() {
                 />
                 <strong>{Math.round(zoom * 100)}%</strong>
               </label>
-              <div className="clipboard-row">
-                <button
-                  type="button"
-                  className="copy-button"
-                  onClick={copySelectionToClipboard}
-                  disabled={!imageSource}
-                  title="Copy region as x, y, width, height"
-                  aria-label="Copy region as x, y, width, height"
-                >
-                  Copy region
-                </button>
-                <span className="clipboard-status" aria-live="polite">
-                  {copyStatus}
-                </span>
-              </div>
             </div>
           </div>
 
@@ -552,6 +539,26 @@ export default function App() {
           </div>
 
           <div className="output-stack">
+            <div className="frame-output">
+              <div className="frame-output-header">
+                <span>Frame</span>
+                <button
+                  type="button"
+                  className="copy-link"
+                  onClick={copySelectionToClipboard}
+                  disabled={!imageSource}
+                  title="Copy region as x, y, width, height arguments"
+                  aria-label="Copy region as x, y, width, height arguments"
+                >
+                  Copy
+                </button>
+              </div>
+              <code>{frameArguments}</code>
+              <span className="clipboard-status" aria-live="polite">
+                {copyStatus}
+              </span>
+            </div>
+
             <div className="crop-preview">
               <canvas ref={previewCanvasRef} />
             </div>

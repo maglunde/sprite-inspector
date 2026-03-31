@@ -186,14 +186,6 @@ code {
   margin-bottom: 6px;
 }
 
-.clipboard-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
 .zoom-control {
   display: flex;
   align-items: center;
@@ -210,20 +202,6 @@ code {
 
 .zoom-control input {
   width: 160px;
-}
-
-.copy-button {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  color: #fff7ed;
-  border-radius: 14px;
-  padding: 11px 16px;
-  cursor: pointer;
-}
-
-.copy-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 .clipboard-status {
@@ -311,6 +289,49 @@ code {
 .output-stack {
   display: grid;
   gap: 18px;
+}
+
+.frame-output {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.frame-output span {
+  color: rgba(244, 239, 232, 0.62);
+}
+
+.frame-output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.copy-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fdba74;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+.copy-link:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.frame-output code {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.88);
 }
 
 .crop-preview {
@@ -426,10 +447,6 @@ code {
 
   .viewer-toolbar {
     justify-items: stretch;
-  }
-
-  .clipboard-row {
-    justify-content: flex-start;
   }
 
   .zoom-control {
