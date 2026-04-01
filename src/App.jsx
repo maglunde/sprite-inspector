@@ -91,13 +91,16 @@ export default function App() {
   const [selectionData, setSelectionData] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
+  const [isDragActive, setIsDragActive] = useState(false)
   const imageRef = useRef(null)
   const imageScrollRef = useRef(null)
   const imageSurfaceRef = useRef(null)
+  const selectionOverlayRef = useRef(null)
   const sourceCanvasRef = useRef(null)
   const previewCanvasRef = useRef(null)
   const interactionRef = useRef(null)
   const previousZoomRef = useRef(zoom)
+  const dragDepthRef = useRef(0)
 
   const boundedSelection = useMemo(() => {
     if (!imageSize.width || !imageSize.height) {
@@ -250,25 +253,17 @@ export default function App() {
 
     const animationFrameId = window.requestAnimationFrame(() => {
       const scrollContainer = imageScrollRef.current
-      const imageElement = imageRef.current
+      const selectionOverlay = selectionOverlayRef.current
 
-      if (!scrollContainer || !imageElement) {
+      if (!scrollContainer || !selectionOverlay) {
         previousZoomRef.current = zoom
         return
       }
 
-      const renderedWidth = imageElement.clientWidth
-      const renderedHeight = imageElement.clientHeight
-
-      if (!renderedWidth || !renderedHeight) {
-        previousZoomRef.current = zoom
-        return
-      }
-
-      const selectionCenterX =
-        ((boundedSelection.x + boundedSelection.width / 2) / imageSize.width) * renderedWidth
-      const selectionCenterY =
-        ((boundedSelection.y + boundedSelection.height / 2) / imageSize.height) * renderedHeight
+      const selectionLeft = selectionOverlay.offsetLeft
+      const selectionTop = selectionOverlay.offsetTop
+      const selectionCenterX = selectionLeft + selectionOverlay.offsetWidth / 2
+      const selectionCenterY = selectionTop + selectionOverlay.offsetHeight / 2
 
       scrollContainer.scrollLeft = clamp(
         selectionCenterX - scrollContainer.clientWidth / 2,
@@ -297,9 +292,7 @@ export default function App() {
     }))
   }
 
-  function handleUpload(event) {
-    const file = event.target.files?.[0]
-
+  function loadImageFile(file) {
     if (!file) {
       return
     }
@@ -313,6 +306,57 @@ export default function App() {
     setImageName(file.name)
     setZoom(1)
     setImageSource(URL.createObjectURL(file))
+  }
+
+  function handleUpload(event) {
+    loadImageFile(event.target.files?.[0])
+    event.target.value = ''
+  }
+
+  function handleDragEnter(event) {
+    event.preventDefault()
+    dragDepthRef.current += 1
+    setIsDragActive(true)
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+    setIsDragActive(true)
+  }
+
+  function handleDragLeave(event) {
+    event.preventDefault()
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
+
+    if (dragDepthRef.current === 0) {
+      setIsDragActive(false)
+    }
+  }
+
+  function handleDrop(event) {
+    event.preventDefault()
+    dragDepthRef.current = 0
+    setIsDragActive(false)
+    loadImageFile(event.dataTransfer.files?.[0])
+  }
+
+  function handleImageWheel(event) {
+    if (!imageSource || (!event.altKey && !event.ctrlKey)) {
+      return
+    }
+
+    event.preventDefault()
+
+    setZoom((current) => {
+      const nextZoom = clamp(
+        Number((current * Math.exp(-event.deltaY * 0.001)).toFixed(2)),
+        1,
+        12,
+      )
+
+      return nextZoom
+    })
   }
 
   function handleImageLoad(event) {
@@ -398,8 +442,8 @@ export default function App() {
 
     setSelection((current) => normalizeSelection({
       ...current,
-      x: point.x,
-      y: point.y,
+      x: point.x - Math.floor(current.width / 2),
+      y: point.y - Math.floor(current.height / 2),
     }))
   }
 
@@ -516,11 +560,19 @@ export default function App() {
             the crop, dominant colors, and pixel values.
           </p>
         </div>
-        <label className="upload-card">
+        <label
+          className={`upload-card${isDragActive ? ' upload-card-active' : ''}`}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <span className="upload-label">Choose sprite or image</span>
           <input type="file" accept="image/*" onChange={handleUpload} />
           <strong>{imageName}</strong>
-          <span className="upload-hint">PNG, JPG, GIF, or WebP</span>
+          <span className="upload-hint">
+            {isDragActive ? 'Drop image here' : 'PNG, JPG, GIF, or WebP'}
+          </span>
         </label>
       </section>
 
@@ -599,7 +651,11 @@ export default function App() {
 
           <div className="image-stage">
             {imageSource ? (
-              <div ref={imageScrollRef} className="image-scroll">
+              <div
+                ref={imageScrollRef}
+                className="image-scroll"
+                onWheel={handleImageWheel}
+              >
                 <div
                   ref={imageSurfaceRef}
                   className="image-surface"
@@ -618,6 +674,7 @@ export default function App() {
                   />
                   {imageSize.width && imageSize.height ? (
                     <div
+                      ref={selectionOverlayRef}
                       className="selection-overlay"
                       onPointerDown={handleOverlayPointerDown}
                       style={{

@@ -85,6 +85,20 @@ code {
   gap: 10px;
   padding: 24px;
   cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.upload-card-active {
+  border-color: rgba(249, 115, 22, 0.9);
+  background: rgba(249, 115, 22, 0.16);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(249, 115, 22, 0.28) inset;
+  transform: translateY(-2px);
 }
 
 .upload-card input {
@@ -210,7 +224,7 @@ code {
 }
 
 .image-stage {
-  min-height: 420px;
+  height: clamp(280px, 52vh, 560px);
   border-radius: 20px;
   overflow: hidden;
   background:
@@ -224,7 +238,7 @@ code {
 
 .image-scroll {
   width: 100%;
-  min-height: 420px;
+  height: 100%;
   overflow: auto;
 }
 
@@ -280,7 +294,7 @@ code {
 }
 
 .empty-state {
-  min-height: 420px;
+  height: 100%;
   display: grid;
   place-items: center;
   color: rgba(244, 239, 232, 0.56);
@@ -425,7 +439,7 @@ code {
   }
 
   .image-stage {
-    min-height: 320px;
+    height: 360px;
   }
 }
 
