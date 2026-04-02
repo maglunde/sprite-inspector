@@ -84,7 +84,6 @@ code {
   display: grid;
   gap: 10px;
   padding: 24px;
-  cursor: pointer;
   transition:
     border-color 140ms ease,
     background-color 140ms ease,
@@ -101,8 +100,43 @@ code {
   transform: translateY(-2px);
 }
 
-.upload-card input {
+.upload-input-label {
+  display: grid;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.upload-input-label input {
   width: 100%;
+}
+
+.upload-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.upload-action-button {
+  border: 1px solid rgba(249, 115, 22, 0.42);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(249, 115, 22, 0.14);
+  color: #fdba74;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.upload-action-button:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: rgba(249, 115, 22, 0.64);
+  transform: translateY(-1px);
+}
+
+.upload-action-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .upload-label {

@@ -1,3 +1,4 @@
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
@@ -83,5 +84,58 @@ describe('App', () => {
 
     expect(await screen.findByText(/pasted image/i)).toBeInTheDocument()
     expect(getAsFile).toHaveBeenCalled()
+  })
+
+  it('fetches a random large image from the internet', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: vi.fn().mockResolvedValue(new Blob(['fake-image'], { type: 'image/jpeg' })),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /random 1024/i }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringMatching(/^https:\/\/picsum\.photos\/seed\/.+\/1024\/1920\?request=\d+$/),
+        expect.objectContaining({
+          cache: 'no-store',
+          mode: 'cors',
+        }),
+      )
+    })
+    expect(await screen.findByText(/^Random image /i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /load another random image/i })).toBeInTheDocument()
+
+    vi.unstubAllGlobals()
+  })
+
+  it('can fetch a new random image on repeated clicks', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: vi.fn().mockResolvedValue(new Blob(['fake-image'], { type: 'image/jpeg' })),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+    render(<App />)
+
+    const randomButton = screen.getByRole('button', { name: /random 1024/i })
+    await user.click(randomButton)
+    await user.click(screen.getByRole('button', { name: /load another random image/i }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+    })
+
+    const [firstUrl] = fetchMock.mock.calls[0]
+    const [secondUrl] = fetchMock.mock.calls[1]
+
+    expect(firstUrl).not.toEqual(secondUrl)
+
+    vi.unstubAllGlobals()
   })
 })

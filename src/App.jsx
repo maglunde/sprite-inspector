@@ -99,6 +99,8 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
   const [isDragActive, setIsDragActive] = useState(false)
+  const [isRandomLoading, setIsRandomLoading] = useState(false)
+  const [hasLoadedRandomImage, setHasLoadedRandomImage] = useState(false)
   const imageRef = useRef(null)
   const imageScrollRef = useRef(null)
   const imageSurfaceRef = useRef(null)
@@ -108,6 +110,7 @@ export default function App() {
   const interactionRef = useRef(null)
   const previousZoomRef = useRef(zoom)
   const dragDepthRef = useRef(0)
+  const randomRequestIdRef = useRef(0)
 
   const boundedSelection = useMemo(() => {
     if (!imageSize.width || !imageSize.height) {
@@ -299,6 +302,14 @@ export default function App() {
     }))
   }
 
+  function applyImageSource(nextImageSource, nextImageName) {
+    setErrorMessage('')
+    setCopyStatus('')
+    setImageName(nextImageName)
+    setZoom(1)
+    setImageSource(nextImageSource)
+  }
+
   function loadImageFile(file) {
     if (!file) {
       return
@@ -309,10 +320,44 @@ export default function App() {
       return
     }
 
+    setHasLoadedRandomImage(false)
+    applyImageSource(URL.createObjectURL(file), file.name?.trim() || 'Pasted image')
+  }
+
+  async function loadRandomImage() {
+    if (isRandomLoading) {
+      return
+    }
+
+    setIsRandomLoading(true)
     setErrorMessage('')
-    setImageName(file.name?.trim() || 'Pasted image')
-    setZoom(1)
-    setImageSource(URL.createObjectURL(file))
+
+    try {
+      randomRequestIdRef.current += 1
+      const requestId = randomRequestIdRef.current
+      const seed = `sprite-${Date.now()}-${requestId}`
+      const response = await fetch(`https://picsum.photos/seed/${seed}/1024/1920?request=${requestId}`, {
+        cache: 'no-store',
+        mode: 'cors',
+      })
+
+      if (!response.ok) {
+        throw new Error('Random image fetch failed')
+      }
+
+      const blob = await response.blob()
+
+      if (!blob.type.startsWith('image/')) {
+        throw new Error('Random image is not an image')
+      }
+
+      setHasLoadedRandomImage(true)
+      applyImageSource(URL.createObjectURL(blob), `Random image ${seed}`)
+    } catch {
+      setErrorMessage('Could not fetch a random image. Check your connection and try again.')
+    } finally {
+      setIsRandomLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -598,20 +643,43 @@ export default function App() {
             the crop, dominant colors, and pixel values.
           </p>
         </div>
-        <label
+        <div
           className={`upload-card${isDragActive ? ' upload-card-active' : ''}`}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <span className="upload-label">Choose sprite or image</span>
-          <input type="file" accept="image/*" onChange={handleUpload} />
+          <label className="upload-input-label" htmlFor="sprite-upload-input">
+            <span className="upload-label">Choose sprite or image</span>
+            <input
+              id="sprite-upload-input"
+              type="file"
+              accept="image/*"
+              onChange={handleUpload}
+            />
+          </label>
+          <div className="upload-actions">
+            <button
+              type="button"
+              className="upload-action-button"
+              onClick={loadRandomImage}
+              disabled={isRandomLoading}
+            >
+              {isRandomLoading
+                ? 'Loading random image...'
+                : hasLoadedRandomImage
+                  ? 'Load another random image'
+                  : 'Random 1024 × 1920 image'}
+            </button>
+          </div>
           <strong>{imageName}</strong>
           <span className="upload-hint">
-            {isDragActive ? 'Drop image here' : 'PNG, JPG, GIF, WebP, or paste an image'}
+            {isDragActive
+              ? 'Drop image here'
+              : 'PNG, JPG, GIF, WebP, drag and drop, paste, or fetch a random image'}
           </span>
-        </label>
+        </div>
       </section>
 
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
