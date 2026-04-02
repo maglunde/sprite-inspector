@@ -11,6 +11,13 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
+function isEditableTarget(target) {
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')
+  )
+}
+
 function rgbaToHex(r, g, b, a) {
   const alpha = Math.round((a / 255) * 100)
   return `#${[r, g, b].map((part) => part.toString(16).padStart(2, '0')).join('')} (${alpha}%)`
@@ -303,10 +310,41 @@ export default function App() {
     }
 
     setErrorMessage('')
-    setImageName(file.name)
+    setImageName(file.name?.trim() || 'Pasted image')
     setZoom(1)
     setImageSource(URL.createObjectURL(file))
   }
+
+  useEffect(() => {
+    function handlePaste(event) {
+      if (isEditableTarget(event.target)) {
+        return
+      }
+
+      const imageItem = [...(event.clipboardData?.items ?? [])].find((item) =>
+        item.type.startsWith('image/'),
+      )
+
+      if (!imageItem) {
+        return
+      }
+
+      const file = imageItem.getAsFile()
+
+      if (!file) {
+        return
+      }
+
+      event.preventDefault()
+      loadImageFile(file)
+    }
+
+    window.addEventListener('paste', handlePaste)
+
+    return () => {
+      window.removeEventListener('paste', handlePaste)
+    }
+  }, [])
 
   function handleUpload(event) {
     loadImageFile(event.target.files?.[0])
@@ -571,7 +609,7 @@ export default function App() {
           <input type="file" accept="image/*" onChange={handleUpload} />
           <strong>{imageName}</strong>
           <span className="upload-hint">
-            {isDragActive ? 'Drop image here' : 'PNG, JPG, GIF, or WebP'}
+            {isDragActive ? 'Drop image here' : 'PNG, JPG, GIF, WebP, or paste an image'}
           </span>
         </label>
       </section>
