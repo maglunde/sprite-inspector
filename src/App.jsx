@@ -99,6 +99,7 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
   const [isDragActive, setIsDragActive] = useState(false)
+  const [previewDragMode, setPreviewDragMode] = useState('pan')
   const [isRandomLoading, setIsRandomLoading] = useState(false)
   const [hasLoadedRandomImage, setHasLoadedRandomImage] = useState(false)
   const imageRef = useRef(null)
@@ -602,6 +603,7 @@ export default function App() {
       return
     }
 
+    const direction = previewDragMode === 'pan' ? -1 : 1
     const deltaX = Math.round(
       ((event.clientX - interaction.startClientX) / bounds.width) * interaction.startSelection.width,
     )
@@ -612,8 +614,8 @@ export default function App() {
     setSelection(
       normalizeSelection({
         ...interaction.startSelection,
-        x: interaction.startSelection.x + deltaX,
-        y: interaction.startSelection.y + deltaY,
+        x: interaction.startSelection.x + deltaX * direction,
+        y: interaction.startSelection.y + deltaY * direction,
       }),
     )
   }
@@ -837,6 +839,9 @@ export default function App() {
             </div>
 
             <div className="crop-preview">
+              <div className="crop-preview-header">
+                <span>Crop — drag to reposition</span>
+              </div>
               {imageSource ? (
                 <canvas
                   ref={previewCanvasRef}
@@ -849,6 +854,28 @@ export default function App() {
               ) : (
                 <p className="muted">No image selected.</p>
               )}
+              <div className="drag-mode-toggle">
+                <label>
+                  <input
+                    type="radio"
+                    name="preview-drag-mode"
+                    value="pan"
+                    checked={previewDragMode === 'pan'}
+                    onChange={() => setPreviewDragMode('pan')}
+                  />
+                  Pan image
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="preview-drag-mode"
+                    value="selection"
+                    checked={previewDragMode === 'selection'}
+                    onChange={() => setPreviewDragMode('selection')}
+                  />
+                  Move selection
+                </label>
+              </div>
             </div>
 
             <div className="stats-grid">
