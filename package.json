@@ -1,8 +1,31 @@
 {
   "name": "sprite-inspector",
+  "description": "A Vite + React tool for inspecting cropped sprite regions, dominant colors, average color, and per-pixel RGBA values.",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/maglunde/sprite-inspector",
+  "bugs": {
+    "url": "https://github.com/maglunde/sprite-inspector/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maglunde/sprite-inspector.git"
+  },
+  "keywords": [
+    "sprite",
+    "image",
+    "inspector",
+    "pixel",
+    "crop",
+    "react",
+    "vite"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "packageManager": "npm@11.6.2",
   "scripts": {
     "dev": "vite",
     "start": "vite --open",
@@ -22,9 +45,9 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "jsdom": "^25.0.1",
-    "vite": "^5.4.8",
-    "vitest": "^2.1.9"
+    "vite": "^8.0.8",
+    "vitest": "^4.1.4"
   }
 }
