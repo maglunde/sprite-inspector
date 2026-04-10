@@ -1,7 +1,10 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
+const isGitHubPagesBuild = process.env.GITHUB_PAGES === 'true'
+
 export default defineConfig({
+  base: isGitHubPagesBuild ? '/sprite-inspector/' : '/',
   plugins: [react()],
   test: {
     environment: 'jsdom',

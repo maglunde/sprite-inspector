@@ -54,6 +54,8 @@ npm run test:e2e
 
 This repository is intended to be public on GitHub, but the package itself remains `private` to avoid accidental publication to npm.
 
+GitHub Pages deployment is configured through GitHub Actions. The Pages build uses the repository base path `/sprite-inspector/`, which matches the project site URL under `maglunde.github.io`.
+
 ## License
 
 [MIT](./LICENSE)
