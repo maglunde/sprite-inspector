@@ -6,6 +6,9 @@ const isGitHubPagesBuild = process.env.GITHUB_PAGES === 'true'
 export default defineConfig({
   base: isGitHubPagesBuild ? '/sprite-inspector/' : '/',
   plugins: [react()],
+  server:{
+    port: 9011
+  },
   test: {
     environment: 'jsdom',
     globals: true,

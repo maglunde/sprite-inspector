@@ -62,7 +62,7 @@ code {
   margin: 0;
   font-size: clamp(2.4rem, 4vw, 4.6rem);
   line-height: 0.95;
-  max-width: 12ch;
+  max-width: 20ch;
 }
 
 .lead {
@@ -100,27 +100,35 @@ code {
   transform: translateY(-2px);
 }
 
+.upload-card-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 20px;
+  align-items: stretch;
+  height: 220px;
+}
+.upload-primary {
+  display: grid;
+  gap: 10px;
+  height: 100%;
+}
+
 .upload-input-label {
   display: grid;
   gap: 10px;
-  cursor: pointer;
 }
 
-.upload-input-label input {
-  width: 100%;
+.upload-hidden-input {
+  display: none;
 }
 
-.upload-actions {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.upload-action-button {
-  border: 1px solid rgba(249, 115, 22, 0.42);
-  border-radius: 999px;
+.upload-picker-button {
+  justify-self: start;
+  border: 1px solid rgba(147, 197, 253, 0.34);
+  border-radius: 12px;
   padding: 10px 14px;
-  background: rgba(249, 115, 22, 0.14);
-  color: #fdba74;
+  background: rgba(59, 130, 246, 0.12);
+  color: #dbeafe;
   cursor: pointer;
   transition:
     background-color 140ms ease,
@@ -128,15 +136,83 @@ code {
     transform 140ms ease;
 }
 
-.upload-action-button:hover:not(:disabled) {
-  background: rgba(249, 115, 22, 0.2);
-  border-color: rgba(249, 115, 22, 0.64);
+.upload-picker-button:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(147, 197, 253, 0.52);
   transform: translateY(-1px);
 }
+.recent-files {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 8px;
+  /* 1. Fikser vekst: Sett maks høyde lik venstresiden (juster px etter behov) */
+  max-height: 200px;
+  min-height: 0;
+  overflow: hidden;
+  /* 2. Fikser posisjon: Tvinger overskrift og liste til toppen */
+  align-content: start;
+}
 
-.upload-action-button:disabled {
-  opacity: 0.6;
-  cursor: wait;
+.recent-files-list {
+  display: grid;
+  gap: 6px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+  /* 3. Fikser posisjon: Tvinger selve fil-radene til toppen av lista */
+  align-content: start;
+}
+.recent-files-label {
+  color: rgba(244, 239, 232, 0.62);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.recent-file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.recent-file-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fdba74;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+.recent-file-link:hover {
+  color: #fd923c;
+}
+
+.recent-file-remove {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #f87171;
+  cursor: pointer;
+  line-height: 1;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+
+.recent-file-remove:hover {
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.14);
 }
 
 .upload-label {
@@ -148,6 +224,10 @@ code {
 .panel-heading p,
 .muted {
   color: rgba(244, 239, 232, 0.66);
+}
+
+.upload-hint {
+  align-self: flex-end;
 }
 
 .workspace {
@@ -189,8 +269,14 @@ code {
 
 .input-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: end;
 }
 
 .field {
@@ -212,6 +298,46 @@ code {
   color: inherit;
   border-radius: 14px;
   padding: 12px 14px;
+}
+
+.lock-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(244, 239, 232, 0.72);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+
+.lock-toggle:hover:not(:disabled) {
+  border-color: rgba(249, 115, 22, 0.52);
+  color: #fdba74;
+  transform: translateY(-1px);
+}
+
+.lock-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lock-toggle-active {
+  border-color: rgba(249, 115, 22, 0.66);
+  background: rgba(249, 115, 22, 0.16);
+  color: #fdba74;
+}
+
+.lock-toggle-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .selection-meta {
@@ -382,6 +508,61 @@ code {
   background: rgba(15, 23, 42, 0.88);
 }
 
+.frame-nudge-controls {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(3, 34px);
+  grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+  gap: 4px;
+}
+
+.nudge-button {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.88);
+  color: #fdba74;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+
+.nudge-button:hover:not(:disabled) {
+  border-color: rgba(249, 115, 22, 0.58);
+  background: rgba(249, 115, 22, 0.14);
+  transform: translateY(-1px);
+}
+
+.nudge-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nudge-button-up {
+  grid-area: up;
+}
+
+.nudge-button-left {
+  grid-area: left;
+}
+
+.nudge-button-right {
+  grid-area: right;
+}
+
+.nudge-button-down {
+  grid-area: down;
+}
+
 .crop-preview {
   border-radius: 18px;
   padding: 14px;
@@ -408,6 +589,27 @@ code {
   font-size: inherit;
 }
 
+.crop-preview-workbench {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+  border-radius: 14px;
+  outline: none;
+}
+
+.crop-preview-workbench:focus-visible {
+  /*box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.5);*/
+}
+
+.crop-preview-frame {
+  width: min(100%, 220px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
 .drag-mode-toggle {
   display: flex;
   gap: 14px;
@@ -432,6 +634,8 @@ code {
 
 .crop-preview-canvas {
   max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
   image-rendering: pixelated;
   border-radius: 12px;
@@ -472,28 +676,6 @@ code {
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.matrix {
-  display: grid;
-  gap: 6px;
-  max-height: 320px;
-  overflow: auto;
-  padding-right: 8px;
-}
-
-.matrix-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.matrix-row code {
-  display: inline-block;
-  padding: 4px 7px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 0.78rem;
-}
-
 .error-message {
   margin: 0 0 18px;
   padding: 14px 16px;
@@ -529,9 +711,21 @@ code {
     max-width: none;
   }
 
+  .upload-card-main {
+    grid-template-columns: 1fr;
+  }
+
   .input-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .lock-toggle {
+    width: 100%;
   }
 
   .panel-heading-split {
@@ -549,5 +743,9 @@ code {
 
   .zoom-control input {
     width: 100%;
+  }
+
+  .crop-preview-workbench {
+    flex-direction: column;
   }
 }
