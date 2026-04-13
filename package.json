@@ -2,7 +2,7 @@
   "name": "sprite-inspector",
   "description": "A Vite + React tool for inspecting cropped sprite regions, dominant colors, average color, and per-pixel RGBA values.",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/maglunde/sprite-inspector",
