@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import packageInfo from '../package.json'
 
 const DEFAULT_SELECTION = {
   x: 0,
@@ -98,6 +99,7 @@ function summarizePixels(imageData) {
 
 export default function App() {
   const previewFrameSize = 220
+  const appTitle = `Sprite Inspector (${packageInfo.version})`
   const [selection, setSelection] = useState(DEFAULT_SELECTION)
   const [imageSource, setImageSource] = useState('')
   const [imageName, setImageName] = useState('No file uploaded')
@@ -780,7 +782,7 @@ export default function App() {
     <main className="app-shell">
       <section className="hero">
         <div>
-          <p className="eyebrow">Sprite Inspector</p>
+          <p className="eyebrow">{appTitle}</p>
           <h1>Upload an image and inspect an exact region.</h1>
           <p className="lead">
             Enter <code>x</code>, <code>y</code>, <code>width</code>, and <code>height</code> to see
